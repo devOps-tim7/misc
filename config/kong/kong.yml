@@ -1,0 +1,42 @@
+_format_version: '2.1'
+_transform: true
+
+plugins:
+  - name: prometheus
+
+services:
+  - name: user-service
+    url: http://users:8081
+    routes:
+      - name: users-routes
+        strip_path: false
+        preserve_host: true
+        paths:
+          - /api/users
+
+  - name: post-service
+    url: http://posts:8082
+    routes:
+      - name: posts-routes
+        strip_path: false
+        preserve_host: true
+        paths:
+          - /api/posts
+
+  - name: admin
+    url: http://admin:8083
+    routes:
+      - name: admin-routes
+        strip_path: false
+        preserve_host: true
+        paths:
+          - /api/admin
+
+  - name: auth
+    url: http://auth:8084
+    routes:
+      - name: auth-routes
+        strip_path: false
+        preserve_host: true
+        paths:
+          - /api/auth

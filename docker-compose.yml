@@ -69,6 +69,7 @@ services:
   posts:
     build:
       context: ./post-service
+      dockerfile: Dockerfile.dev
     command: npm start
     environment:
       PORT: 8082
@@ -79,10 +80,17 @@ services:
       DATABASE_PORT: 5432
       DATABASE: postgres
       TOKEN_SECRET: 12345
+      IMAGE_DIR: /var/tmp
+      CLOUD_API_KEY: 524967299866972
+      CLOUD_API_SECRET: GqTsU3hGK7wMNcchiNwrZjyjcLM
+      CLOUD_NAME: djx81qmse
+    ports:
+      - 8082:8082
 
   admin:
     build:
       context: ./admin-service
+      dockerfile: Dockerfile.dev
     command: npm start
     environment:
       PORT: 8083
@@ -93,6 +101,8 @@ services:
       DATABASE_PORT: 5432
       DATABASE: postgres
       TOKEN_SECRET: 12345
+    ports:
+      - 8083:8083
 
   auth:
     build:
@@ -100,8 +110,24 @@ services:
       dockerfile: Dockerfile.dev
     command: npm start
     environment:
-      PORT: 8084
+      PORT: 8084      
       TOKEN_SECRET: 12345
+    ports:
+      - 8084:8084
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    environment:
+      CHOKIDAR_USEPOLLING: 'true'
+      REACT_APP_API_URL: 'http://localhost:8000'
+    volumes:
+      - /usr/src/app/node_modules
+      - ./frontend:/usr/src/app
+
   prometheus:
     image: prom/prometheus
     container_name: prometheus
@@ -110,6 +136,7 @@ services:
       - 9090:9090
     volumes:
       - ./prometheus:/etc/prometheus
+
   grafana:
     image: grafana/grafana:7.5.2
     container_name: grafana
@@ -119,17 +146,19 @@ services:
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
     ports:
-      - 3000:3000
+      - 4000:3000
     volumes:
       - ./provisioning:/etc/grafana/provisioning
       - grafana:/var/lib/grafana
     depends_on:
       - prometheus
+
   node-exporter:
     image: prom/node-exporter:v1.1.2
     container_name: node-exporter
     ports:
       - 9100:9100
+
   cadvisor:
     image: google/cadvisor
     container_name: cadvisor
@@ -137,8 +166,8 @@ services:
       - 8080:8080
 
 volumes:
-  grafana:
-  prometheus:
   users-db:
   posts-db:
   admin-db:
+  grafana:
+  prometheus:

@@ -40,3 +40,12 @@ services:
         preserve_host: true
         paths:
           - /api/auth
+
+  - name: agent
+    url: http://agent:8085
+    routes:
+      - name: agent-routes
+        strip_path: false
+        preserve_host: true
+        paths:
+          - /api/agent

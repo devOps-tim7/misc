@@ -30,6 +30,16 @@ services:
     volumes:
       - admin-db:/var/lib/postgresql/data
 
+  agent-db:
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - '5435:5432'
+    volumes:
+      - agent-db:/var/lib/postgresql/data
+
   gateway:
     image: kong:latest
     environment:
@@ -115,6 +125,24 @@ services:
     ports:
       - 8084:8084
 
+  agent:
+    build:
+      context: ./agent-service
+      dockerfile: Dockerfile.dev
+    command: npm start
+    environment:
+      PORT: 8085
+      DATABASE_TYPE: postgres
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_HOST: agent-db
+      DATABASE_PORT: 5432
+      DATABASE: postgres
+      TOKEN_SECRET: 12345
+      SCHEDULE_STRING: '*/30 * * * * *'
+    ports:
+      - 8085:8085
+
   frontend:
     build:
       context: ./frontend
@@ -122,11 +150,7 @@ services:
     ports:
       - '3000:3000'
     environment:
-      CHOKIDAR_USEPOLLING: 'true'
       REACT_APP_API_URL: 'http://localhost:8000'
-    volumes:
-      - /usr/src/app/node_modules
-      - ./frontend:/usr/src/app
 
   prometheus:
     image: prom/prometheus
@@ -169,5 +193,6 @@ volumes:
   users-db:
   posts-db:
   admin-db:
+  agent-db:
   grafana:
   prometheus:
